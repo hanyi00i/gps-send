@@ -1,53 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>MQTT Over WebSockets Publisher</title>
+    <link rel="stylesheet" href="publisher.css" />
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  </head>
   <body>
-    <p>Click the button to get your coordinates.</p>
-
-    <button onclick="getLocation()">Try It</button>
-
-    <p id="demo"></p>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
-
-    <script>
-      var x = document.getElementById("demo");
-      var mqttClient;
-
-      function getLocation() {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(showPosition);
-        } else {
-          x.innerHTML = "Geolocation is not supported by this browser.";
-        }
-      }
-
-      function showPosition(position) {
-        x.innerHTML =
-          "Latitude: " +
-          position.coords.latitude +
-          "<br>Longitude: " +
-          position.coords.longitude;
-
-        // Connect to MQTT broker
-        mqttClient = new Paho.MQTT.Client(
-          "mqtt://broker.emqx.io",
-          8083,
-          "gps-mqtt-500"
-        );
-        mqttClient.connect({ onSuccess: onConnect });
-      }
-
-      function onConnect() {
-        // Publish coordinates to an MQTT topic
-        var message = new Paho.MQTT.Message(
-          JSON.stringify({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          })
-        );
-        message.destinationName = "/RESTful";
-        mqttClient.send(message);
-      }
-    </script>
+    <h1>MQTT Over WebSockets</h1>
+    <h2>Publisher</h2>
+    <div class="line"></div>
+    <ul class="wrapper">
+      <li class="form-row">
+        <label for="topic">Topic</label>
+        <input type="text" id="topic" />
+      </li>
+      <li class="form-row">
+        <label for="message">Message</label>
+        <input type="text" id="message" />
+      </li>
+      <li class="form-row">
+        <button type="button" class="publish">Publish</button>
+      </li>
+    </ul>
+    <script src="publisher.js"></script>
   </body>
 </html>
