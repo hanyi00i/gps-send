@@ -1,70 +1,53 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <style>
-      /* Style for the location display */
-      #location {
-        font-size: 18px;
-        margin-bottom: 10px;
-      }
-
-      /* Style for the button */
-      #sendButton {
-        padding: 10px 20px;
-        font-size: 16px;
-      }
-    </style>
-  </head>
   <body>
-    <h1>GPS Location Sender</h1>
-    <p id="location">Waiting for GPS location...</p>
-    <button id="sendButton">Send Location</button>
+    <p>Click the button to get your coordinates.</p>
 
-    <!-- Include MQTT.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/3.1.0/mqtt.min.js"></script>
+    <button onclick="getLocation()">Try It</button>
+
+    <p id="demo"></p>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
 
     <script>
-      // MQTT broker details
-      const broker = "mqtt://broker.emqx.io"; // Replace with your broker URL
-      const topic = "/RESTful"; // Replace with your desired topic
+      var x = document.getElementById("demo");
+      var mqttClient;
 
-      // Create a MQTT client
-      const client = mqtt.connect(broker);
-
-      // Function to send the location
-      function sendLocation(latitude, longitude) {
-        const location = {
-          latitude: latitude,
-          longitude: longitude,
-        };
-
-        // Publish the location as a JSON string
-        client.publish(topic, JSON.stringify(location));
+      function getLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+          x.innerHTML = "Geolocation is not supported by this browser.";
+        }
       }
 
-      // Function to handle the button click event
-      function handleButtonClick() {
-        navigator.geolocation.getCurrentPosition(
-          function (position) {
-            const latitude = position.coords.latitude;
-            const longitude = position.coords.longitude;
+      function showPosition(position) {
+        x.innerHTML =
+          "Latitude: " +
+          position.coords.latitude +
+          "<br>Longitude: " +
+          position.coords.longitude;
 
-            // Update the location display
-            const locationElement = document.getElementById("location");
-            locationElement.textContent = `Latitude: ${latitude}, Longitude: ${longitude}`;
-
-            // Send the location
-            sendLocation(latitude, longitude);
-          },
-          function (error) {
-            console.error(error);
-          }
+        // Connect to MQTT broker
+        mqttClient = new Paho.MQTT.Client(
+          "broker.emqx.io",
+          8083,
+          "client-identifier"
         );
+        mqttClient.connect({ onSuccess: onConnect });
       }
 
-      // Add event listener to the button
-      const sendButton = document.getElementById("sendButton");
-      sendButton.addEventListener("click", handleButtonClick);
+      function onConnect() {
+        // Publish coordinates to an MQTT topic
+        var message = new Paho.MQTT.Message(
+          JSON.stringify({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          })
+        );
+        message.destinationName = "/RESTful";
+        mqttClient.send(message);
+      }
     </script>
   </body>
 </html>
