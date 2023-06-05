@@ -1,34 +1,52 @@
 <!DOCTYPE html>
 <html>
   <body>
-    <p id="coordinates"></p>
+    <p>Click the button to get your coordinates.</p>
+
+    <button onclick="getLocation()">Try It</button>
+
+    <p id="demo"></p>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
 
     <script>
-      var coordinatesElement = document.getElementById("coordinates");
+      var x = document.getElementById("demo");
       var mqttClient;
 
-      // Connect to MQTT broker
-      mqttClient = new Paho.MQTT.Client(
-        "mqtt://broker.emqx.io",
-        8083,
-        "gps-mqtt-500"
-      );
-      mqttClient.connect({ onSuccess: onConnect });
-
-      function onConnect() {
-        mqttClient.subscribe("/RESTful");
-        mqttClient.onMessageArrived = onMessageArrived;
+      function getLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+          x.innerHTML = "Geolocation is not supported by this browser.";
+        }
       }
 
-      function onMessageArrived(message) {
-        var data = JSON.parse(message.payloadString);
-        var latitude = data.latitude;
-        var longitude = data.longitude;
+      function showPosition(position) {
+        x.innerHTML =
+          "Latitude: " +
+          position.coords.latitude +
+          "<br>Longitude: " +
+          position.coords.longitude;
 
-        coordinatesElement.innerHTML =
-          "Latitude: " + latitude + "<br>Longitude: " + longitude;
+        // Connect to MQTT broker
+        mqttClient = new Paho.MQTT.Client(
+          "mqtt://broker.emqx.io",
+          8083,
+          "gps-mqtt-500"
+        );
+        mqttClient.connect({ onSuccess: onConnect });
+      }
+
+      function onConnect() {
+        // Publish coordinates to an MQTT topic
+        var message = new Paho.MQTT.Message(
+          JSON.stringify({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          })
+        );
+        message.destinationName = "/RESTful";
+        mqttClient.send(message);
       }
     </script>
   </body>
