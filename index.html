@@ -56,7 +56,7 @@
       function onConnect() {
         mqtt.subscribe("gps-idp");
         message = new Paho.MQTT.Message(
-          String(latitude) + ", " + String(longitude)
+          String(latitude) + "," + String(longitude)
         );
         message.destinationName = "gps-idp";
         mqtt.send(message);
