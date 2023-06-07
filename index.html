@@ -48,13 +48,12 @@
           onSuccess: onConnect,
           onFailure: onFailure,
         };
-        mqtt.onConnectionLost = onConnectionLost;
+        //mqtt.onConnectionLost = onConnectionLost;
         mqtt.onMessageArrived = onMessageArrived;
         mqtt.onMessageDelivered = onMessageDelivered;
         mqtt.connect(options);
       }
       function onConnect() {
-        console.log("onConnect");
         mqtt.subscribe("gps-idp");
         message = new Paho.MQTT.Message(
           String(latitude) + ", " + String(longitude)
@@ -63,7 +62,7 @@
         mqtt.send(message);
         document.getElementById("messages").innerHTML = "Connected to " + host;
         connected_flag = 1;
-        console.log("Connected" + connected_flag);
+        console.log("Connected_flag " + connected_flag);
       }
       function onConnectionLost(responseObject) {
         console.log("connection lost");
@@ -98,6 +97,7 @@
       function showPosition(position) {
         latitude = position.coords.latitude;
         longitude = position.coords.longitude;
+        MQTTconnect();
       }
     </script>
   </head>
@@ -105,10 +105,8 @@
     <h1>Smart Bus Stop GPS</h1>
     <script>
       getLocation();
-      MQTTconnect();
     </script>
     What GPS send:<br />
     <span id="messages"></span><br />
-    <span id="demo"></span>
   </body>
 </html>
