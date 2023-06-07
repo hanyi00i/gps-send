@@ -66,8 +66,8 @@
         connected_flag = 0;
       }
       function onMessageArrived(message) {
-        out_msg = "Message received: " + message.payloadString + " <br> ";
-        out_msg = out_msg + "Topic received: " + message.destinationName;
+        out_msg = "Message send: " + message.payloadString + " <br> ";
+        out_msg = out_msg + "Topic send: " + message.destinationName;
         console.log(out_msg);
         document.getElementById("messages").innerHTML = out_msg;
       }
