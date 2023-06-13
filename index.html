@@ -1,29 +1,32 @@
+<!DOCTYPE html>
 <html>
-  <style>
-    #messages {
-      background-color: #7d7ca4;
-      font-size: 12;
-      font-weight: bold;
-      color: yellow;
-      line-height: 150%;
-    }
-    #status {
-      background-color: #d05f13;
-      font-size: 5;
-      font-weight: bold;
-      color: green;
-      line-height: 120%;
-    }
-    #demo {
-      background-color: #d05f13;
-      font-size: 20;
-      font-weight: bold;
-      color: rgb(161, 29, 155);
-      line-height: 120%;
-    }
-  </style>
   <head>
-    <title>JavaScript MQTT Web Socket</title>
+    <title>GPS MQTT Sender</title>
+    <style>
+      body {
+        background-color: #8ec3eb;
+        font-family: Arial, sans-serif;
+      }
+      h1 {
+        color: #2a6592;
+        text-align: center;
+      }
+      h2 {
+        color: grey;
+        text-align: center;
+      }
+      #messages {
+        background-color: royalblue;
+        color: white;
+        padding: 10px;
+        font-weight: bold;
+        line-height: 150%;
+        margin: 20px auto;
+        max-width: 400px;
+        border-radius: 5px;
+        text-align: center;
+      }
+    </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js"></script>
     <script
@@ -35,13 +38,14 @@
       var reconnectTimeout = 2000;
       var host = "test.mosquitto.org";
       var port = 8081;
+      var client_id = "gps-mqtt-" + parseInt(Math.random() * 100, 10);
 
       var latitude;
       var longitude;
+
       function MQTTconnect() {
-        //document.getElementById("messages").innerHTML = "";
         console.log("Connecting to " + host + " " + port);
-        mqtt = new Paho.MQTT.Client(host, port, "clientjs_send");
+        mqtt = new Paho.MQTT.Client(host, port, client_id);
         var options = {
           useSSL: true,
           timeout: 3,
@@ -53,6 +57,7 @@
         mqtt.onMessageDelivered = onMessageDelivered;
         mqtt.connect(options);
       }
+
       function onConnect() {
         mqtt.subscribe("gps-idp");
         message = new Paho.MQTT.Message(
@@ -60,37 +65,37 @@
         );
         message.destinationName = "gps-idp";
         mqtt.send(message);
-        document.getElementById("messages").innerHTML = "Connected to " + host;
-        connected_flag = 1;
-        console.log("Connected_flag " + connected_flag);
       }
+
       function onConnectionLost(responseObject) {
-        console.log("connection lost");
-        connected_flag = 0;
+        console.log("Connection lost");
       }
+
       function onMessageArrived(message) {
-        out_msg = "Message send: " + message.payloadString + " <br> ";
-        out_msg = out_msg + "Topic subscribed: " + message.destinationName;
+        out_msg = "Latitude: " + latitude + "<br>Longitude: " + longitude;
+        out_msg = out_msg + "<br>Client ID: " + client_id;
         console.log(out_msg);
         document.getElementById("messages").innerHTML = out_msg;
       }
+
       function onMessageDelivered(message) {
-        out_msg = "Message delivered: " + message.payloadString + " <br> ";
-        out_msg = out_msg + "Topic delivered: " + message.destinationName;
+        out_msg = message.payloadString + "<br>Client ID: " + client_id;
         console.log(out_msg);
         document.getElementById("messages").innerHTML = out_msg;
       }
+
       function onFailure(message) {
-        console.log("Failed");
-        document.getElementById("messages").innerHTML = "Connection Failed";
+        console.log("Message Failed");
+        document.getElementById("messages").innerHTML = "Message Failed";
         setTimeout(MQTTconnect, reconnectTimeout);
       }
-      // GPS geo location
+
+      // GPS geolocation
       function getLocation() {
         if (navigator.geolocation) {
           navigator.geolocation.watchPosition(showPosition);
         } else {
-          document.getElementById("demo").innerHTML = "Geolocation NO";
+          console.log("Geolocation is not supported by this browser");
         }
       }
 
@@ -102,11 +107,11 @@
     </script>
   </head>
   <body>
-    <h1>Smart Bus Stop GPS</h1>
+    <h1>IDP: Smart Bus Stop System</h1>
+    <h2>GPS MQTT Sender</h2>
+    <div id="messages">Please select Allow for geolocation.</div>
     <script>
       getLocation();
     </script>
-    What GPS send:<br />
-    <span id="messages"></span><br />
   </body>
 </html>
