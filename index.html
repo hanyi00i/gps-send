@@ -79,9 +79,8 @@
       }
 
       function onMessageDelivered(message) {
-        out_msg = message.payloadString + "\nClient ID: " + client_id;
+        out_msg = message.payloadString;
         console.log(out_msg);
-        document.getElementById("messages").innerHTML = out_msg;
       }
 
       function onFailure(message) {
