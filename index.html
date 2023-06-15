@@ -61,7 +61,7 @@
       function onConnect() {
         mqtt.subscribe("gps-idp");
         message = new Paho.MQTT.Message(
-          String(latitude) + "," + String(longitude)
+          String(latitude) + "," + String(longitude) + "," + client_id
         );
         message.destinationName = "gps-idp";
         mqtt.send(message);
@@ -79,7 +79,7 @@
       }
 
       function onMessageDelivered(message) {
-        out_msg = message.payloadString + "<br>Client ID: " + client_id;
+        out_msg = message.payloadString + "\nClient ID: " + client_id;
         console.log(out_msg);
         document.getElementById("messages").innerHTML = out_msg;
       }
